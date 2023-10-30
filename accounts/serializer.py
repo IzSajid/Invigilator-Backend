@@ -2,6 +2,7 @@ from rest_framework import serializers
 from accounts.models import Cohort
 from accounts.models import JoinedCohort
 from accounts.models import Exam
+from accounts.models import Attended
 from django.contrib.auth.models import User
 
 
@@ -25,4 +26,9 @@ class ExamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exam
         fields = ['id','cohort', 'exam_name', 'exam_duration', 'exam_availabilty']
+
+class AttendedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attended
+        fields = ['id','exam', 'user', 'score', 'date_taken']
 

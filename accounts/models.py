@@ -14,7 +14,9 @@ class JoinedCohort(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.cohort.cohort_name} ({self.cohort.id}) - {self.user.username}"       
+        return f"{self.cohort.cohort_name} ({self.cohort.id}) - {self.user.username}({self.user.id})"     
+    class Meta:
+        unique_together = ('cohort', 'user')  
 
 
 class Exam(models.Model):
@@ -24,5 +26,15 @@ class Exam(models.Model):
     exam_availabilty = models.DurationField(default=timedelta(days=1))
 
     def __str__(self):
-        return f"{self.exam_name} - {self.cohort.cohort_name}.{self.cohort.id}"        
-    
+        return f"{self.exam_name} - {self.cohort.cohort_name}.{self.cohort.id}"  
+
+class Attended(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
+    date_taken = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.exam.exam_name} - {self.user.username}({self.user.id})"  
+    class Meta:
+        unique_together = ('exam', 'user')
