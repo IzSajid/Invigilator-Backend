@@ -18,6 +18,7 @@ class CohortSerializer(serializers.ModelSerializer):
         fields = ['id','cohort_name', 'cohort_creator']
 
 class JoinedCohortSerializer(serializers.ModelSerializer):
+    cohort = CohortSerializer(read_only=True)
     class Meta:
         model = JoinedCohort
         fields = ['id','cohort', 'user']
