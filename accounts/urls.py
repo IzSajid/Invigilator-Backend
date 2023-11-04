@@ -27,5 +27,6 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('admin/', admin.site.urls),
     path('api/cohorts/', views.cohorts, name='cohorts'),
+    path('api/cohorts/<int:id>/', views.cohort, name='cohort'),
     path('api/joined/', views.joined_cohorts, name='joined_cohorts'),
 ]
