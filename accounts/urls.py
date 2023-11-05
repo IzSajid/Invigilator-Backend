@@ -28,5 +28,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/cohorts/', views.cohorts, name='cohorts'),
     path('api/cohorts/<int:id>/', views.cohort, name='cohort'),
+    path('api/cohorts/<int:cohort_id>/users/',views.cohort_users, name='cohort_users'),
     path('api/joined/', views.joined_cohorts, name='joined_cohorts'),
 ]

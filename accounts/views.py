@@ -1,6 +1,7 @@
-
+from accounts.models import User
 from accounts.models import Cohort
 from accounts.models import JoinedCohort
+from accounts.serializer import UserSerializer
 from accounts.serializer import CohortSerializer
 from accounts.serializer import JoinedCohortSerializer
 from django.http import Http404, JsonResponse
@@ -67,11 +68,13 @@ def cohort(request,id):
 @api_view(['GET'])
 def cohort_users(request, cohort_id):
     try:
+        cohort = Cohort.objects.get(id=cohort_id)
         data = JoinedCohort.objects.filter(cohort__id=cohort_id)
-    except JoinedCohort.DoesNotExist:
+    except Cohort.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         users = [jc.user for jc in data]
-        serializer = UserSerializer(users, many=True)
-        return Response({'users': serializer.data})
+        user_serializer = UserSerializer(users, many=True)
+        cohort_serializer = UserSerializer(cohort.cohort_creator)
+        return Response({'creator': cohort_serializer.data, 'users': user_serializer.data})
