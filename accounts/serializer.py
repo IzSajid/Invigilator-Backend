@@ -13,15 +13,30 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CohortSerializer(serializers.ModelSerializer):
+    cohort_creator = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta:
         model = Cohort
         fields = ['id','cohort_name', 'cohort_creator']
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['cohort_creator'] = {
+            'user_id' : instance.cohort_creator.id,
+            'username' : instance.cohort_creator.username,
+        }
+        return representation
 
 class JoinedCohortSerializer(serializers.ModelSerializer):
-    cohort = CohortSerializer(read_only=True)
+    cohort = serializers.PrimaryKeyRelatedField(queryset=Cohort.objects.all())
     class Meta:
         model = JoinedCohort
-        fields = ['id','cohort', 'user']
+        fields = ['id','cohort','user']
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['cohort'] = {
+            'cohort_id' : instance.cohort.id,
+            'cohort_name' : instance.cohort.cohort_name,
+        }
+        return representation
 
 class ExamSerializer(serializers.ModelSerializer):
     class Meta:
