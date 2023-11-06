@@ -1,17 +1,19 @@
-from accounts.models import User
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+from django.http import Http404, JsonResponse
+from rest_framework import status
 from accounts.models import Cohort
 from accounts.models import JoinedCohort
 from accounts.serializer import UserSerializer
 from accounts.serializer import CohortSerializer
 from accounts.serializer import JoinedCohortSerializer
-from django.http import Http404, JsonResponse
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+
+
 
 @api_view(['GET','POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def cohorts(request):
     if request.method == 'GET':
         data = Cohort.objects.all()
@@ -28,7 +30,7 @@ def cohorts(request):
 
 
 @api_view(['GET','POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def joined_cohorts(request):
     if request.method == 'GET':
         data = JoinedCohort.objects.all()

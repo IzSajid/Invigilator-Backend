@@ -54,6 +54,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+        'DEFAULT_AUTHENTICATION_CLASSES':(
+            'rest_framework_simplejwt.authentication.JWTAuthentication',
+        )
+}
+
 CORS_ORIGIN_WHITELIST = ['http://localhost:3000']
 
 ROOT_URLCONF = 'accounts.urls'
@@ -86,11 +92,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-REST_FRAMEWORK = {
-        'DEFAULT_ATHEENTICATION_CLASSES':(
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
-        )
-}
+
 
 
 # Password validation
