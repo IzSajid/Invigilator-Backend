@@ -10,7 +10,16 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id','username','email','password']
-
+        
+    def create(self, validated_data):
+        user = User.objects.create_user(
+             username= validated_data['username'], 
+             email= validated_data['email'],
+            )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+    
 
 class CohortSerializer(serializers.ModelSerializer):
     cohort_creator = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())

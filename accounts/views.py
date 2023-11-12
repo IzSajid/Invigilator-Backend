@@ -9,14 +9,46 @@ from accounts.models import JoinedCohort
 from accounts.serializer import UserSerializer
 from accounts.serializer import CohortSerializer
 from accounts.serializer import JoinedCohortSerializer
+from django.contrib.auth import authenticate
 
+#token customization
+@api_view(['POST'])
+def login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(username=username, password=password)
 
+    if user is not None:
+        refresh = RefreshToken.for_user(user)
+        tokens = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': user.id,
+        }
+        return Response(tokens, status=status.HTTP_200_OK)
+    else:
+        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+#end of token customization
+
+@api_view(['POST'])
+def register(request):
+    seriallizer = UserSerializer(data=request.data)
+    if seriallizer.is_valid():
+        user = seriallizer.save()
+        refresh = RefreshToken.for_user(user)
+        tokens = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': user.id,
+        }
+        return Response(tokens,status=status.HTTP_201_CREATED) 
+    return Response(seriallizer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET','POST'])
 @permission_classes([IsAuthenticated])
 def cohorts(request):
     if request.method == 'GET':
-        data = Cohort.objects.all()
+        data = Cohort.objects.filter(cohort_creator=request.user)
         serializer = CohortSerializer(data, many=True)
         return Response({'cohorts': serializer.data})
     
@@ -33,11 +65,19 @@ def cohorts(request):
 @permission_classes([IsAuthenticated])
 def joined_cohorts(request):
     if request.method == 'GET':
-        data = JoinedCohort.objects.all()
+        data = JoinedCohort.objects.filter(user=request.user)
         serializer = JoinedCohortSerializer(data, many=True)
         return Response({'Joined_cohorts': serializer.data})
    
     elif request.method == 'POST':
+        # Get the cohort the user is trying to join
+        cohort_id = request.data.get('cohort')
+
+        # Check if the user is the creator of the cohort they are trying to join
+        if Cohort.objects.filter(cohort_creator=request.user, id=cohort_id).exists():
+            return Response({'detail': 'A creator cannot join their own cohort.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
         serializer = JoinedCohortSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

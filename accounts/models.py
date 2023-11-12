@@ -9,6 +9,7 @@ class Cohort(models.Model):
     def __str__(self):
         return f"{self.cohort_name} ({self.id})"
     
+    
 class JoinedCohort(models.Model):
     cohort = models.ForeignKey(Cohort, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
