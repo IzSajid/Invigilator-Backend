@@ -9,7 +9,6 @@ class Cohort(models.Model):
     def __str__(self):
         return f"{self.cohort_name} ({self.id})"
     
-    
 class JoinedCohort(models.Model):
     cohort = models.ForeignKey(Cohort, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -39,3 +38,24 @@ class Attended(models.Model):
         return f"{self.exam.exam_name} - {self.user.username}({self.user.id})"  
     class Meta:
         unique_together = ('exam', 'user')
+
+class MCQ(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    question = models.CharField(max_length=200)
+    option1 = models.CharField(max_length=50)
+    option2 = models.CharField(max_length=50)
+    option3 = models.CharField(max_length=50)
+    option4 = models.CharField(max_length=50)
+    answer = models.CharField(max_length=50)
+    marks = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.question} - {self.exam.exam_name} {self.exam.cohort.cohort_name}({self.exam.cohort.id})"
+
+class AnswerMCQ(models.Model):
+    mcq = models.ForeignKey(MCQ, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    selected_option = models.CharField(max_length=50)
+
+    def is_correct(self):
+        return self.selected_option == self.mcq.answer

@@ -3,6 +3,8 @@ from accounts.models import Cohort
 from accounts.models import JoinedCohort
 from accounts.models import Exam
 from accounts.models import Attended
+from accounts.models import MCQ
+from accounts.models import AnswerMCQ
 from django.contrib.auth.models import User
 
 
@@ -56,4 +58,34 @@ class AttendedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attended
         fields = ['id','exam', 'user', 'score', 'date_taken']
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['user'] = {
+            'user_id' : instance.user.id,
+            'username' : instance.user.username,
+        }
+        representation['exam'] = {
+            'exam_id' : instance.exam.id,
+            'exam_name' : instance.exam.exam_name,
+        }
 
+class MCQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MCQ
+        fields = ['id','exam', 'question', 'option1', 'option2', 'option3', 'option4', 'answer', 'marks']
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['exam'] = {
+            'exam_id' : instance.exam.id,
+            'exam_name' : instance.exam.exam_name,
+        }
+        return representation
+
+class AnswerMCQSerializer(serializers.ModelSerializer):
+    is_correct = serializers.SerializerMethodField()
+    class Meta:
+        model = AnswerMCQ
+        fields = ['id','mcq', 'user', 'selected_option', 'is_correct']
+    
+    def get_is_correct(self, obj):
+        return obj.is_correct()

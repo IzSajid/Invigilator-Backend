@@ -3,13 +3,21 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from django.http import Http404, JsonResponse
+from django.contrib.auth import authenticate
 from rest_framework import status
 from accounts.models import Cohort
 from accounts.models import JoinedCohort
+from accounts.models import Exam
+from accounts.models import MCQ
+from accounts.models import AnswerMCQ
+from accounts.models import Attended
 from accounts.serializer import UserSerializer
 from accounts.serializer import CohortSerializer
 from accounts.serializer import JoinedCohortSerializer
-from django.contrib.auth import authenticate
+from accounts.serializer import ExamSerializer
+from accounts.serializer import MCQSerializer
+from accounts.serializer import AnswerMCQSerializer
+from accounts.serializer import AttendedSerializer
 
 #token customization
 @api_view(['POST'])
@@ -120,3 +128,126 @@ def cohort_users(request, cohort_id):
         user_serializer = UserSerializer(users, many=True)
         cohort_serializer = UserSerializer(cohort.cohort_creator)
         return Response({'creator': cohort_serializer.data, 'users': user_serializer.data})
+    
+
+@api_view(['GET','POST','DELETE'])
+@permission_classes([IsAuthenticated])
+def exams(request, id):
+    try:
+        exam = Exam.objects.get(id=id)
+    except Exam.DoesNotExist:
+        return Response({'detail': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = ExamSerializer(exam)
+        return Response(serializer.data)
+
+    elif request.method in ['POST', 'DELETE']:
+        # Check if the request.user is the creator of the cohort
+        if exam.cohort.cohort_creator != request.user:
+            return Response({'detail': 'Only the creator of the cohort can modify or delete the exam.'}, status=status.HTTP_403_FORBIDDEN)
+
+        if request.method == 'POST':
+            serializer = ExamSerializer(exam, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'DELETE':
+            exam.delete()
+            return Response({'detail': 'Deleted'}, status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
+#@permission_classes([IsAuthenticated])
+def create_exam(request):
+    # Check if the request.user is the creator of the cohort
+    cohort_id = request.data.get('cohort')
+    cohort = Cohort.objects.get(id=cohort_id)
+    if cohort.cohort_creator != request.user:
+        return Response({'detail': 'Only the creator of the cohort can create an exam.'}, status=status.HTTP_403_FORBIDDEN)
+
+    serializer = ExamSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+
+@api_view(['GET'])
+def exams_by_cohort(request, cohort_id):
+    exams = Exam.objects.filter(cohort__id=cohort_id)
+    serializer = ExamSerializer(exams, many=True)
+    return Response(serializer.data)
+
+#QUESTION GET
+@api_view(['GET','POST','DELETE'])
+@permission_classes([IsAuthenticated])
+def exam_questions(request, exam_id):
+    try:
+        exam = Exam.objects.get(id=exam_id)
+    except Exam.DoesNotExist:
+        return Response({'detail': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        mcq = MCQ.objects.filter(exam=exam)
+        serializer = MCQSerializer(mcq, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        # Check if the request.user is the creator of the cohort
+        if exam.cohort.cohort_creator != request.user:
+            return Response({'detail': 'Only the creator of the cohort can create an exam.'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = MCQSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        # Check if the request.user is the creator of the cohort
+        if exam.cohort.cohort_creator != request.user:
+            return Response({'detail': 'Only the creator of the cohort can create an exam.'}, status=status.HTTP_403_FORBIDDEN)
+
+        question_id = request.data.get('id')
+        question = MCQ.objects.get(id=question_id)
+        question.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+#ANSWER GET
+@api_view(['GET', 'POST'])
+def answer_mcq(request):
+    if request.method == 'GET':
+        answers = AnswerMCQ.objects.all()
+        serializer = AnswerMCQSerializer(answers, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = AnswerMCQSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#USER ANSWSER IN ONE EXAM   
+@api_view(['GET'])
+def user_exam_answers(request, user_id, exam_id):
+    answers = AnswerMCQ.objects.filter(user_id=user_id, mcq__exam_id=exam_id)
+    serializer = AnswerMCQSerializer(answers, many=True)
+    return Response(serializer.data)
+
+#ATTENDED EXAM
+@api_view(['GET','POST'])
+def attended_exam(request, exam_id):
+    if request.method == 'GET':
+        attended = Attended.objects.filter(exam_id=exam_id)
+        serializer = AttendedSerializer(attended, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = AttendedSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)

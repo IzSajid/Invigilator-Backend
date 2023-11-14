@@ -33,4 +33,9 @@ urlpatterns = [
     path('api/cohorts/<int:id>/', views.cohort, name='cohort'),
     path('api/cohorts/<int:cohort_id>/users/',views.cohort_users, name='cohort_users'),
     path('api/joined/', views.joined_cohorts, name='joined_cohorts'),
+    path('api/exams/<int:id>/', views.exams, name='exams'),
+    path('api/exam/cohort/<int:cohort_id>/', views.exams_by_cohort, name='exams_by_cohort'),
+    path('api/exam/<int:exam_id>/questions/', views.exam_questions, name='exam_questions'),
+    path('api/answer/mcq/', views.answer_mcq, name='answer_mcq'),
+    path('api/exam/answers/<int:user_id>/<int:exam_id>/', views.user_exam_answers, name='user_exam_answers'),
 ]
