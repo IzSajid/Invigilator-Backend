@@ -58,16 +58,6 @@ class AttendedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attended
         fields = ['id','exam', 'user', 'score', 'date_taken']
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['user'] = {
-            'user_id' : instance.user.id,
-            'username' : instance.user.username,
-        }
-        representation['exam'] = {
-            'exam_id' : instance.exam.id,
-            'exam_name' : instance.exam.exam_name,
-        }
 
 class MCQSerializer(serializers.ModelSerializer):
     class Meta:

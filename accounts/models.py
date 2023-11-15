@@ -28,17 +28,6 @@ class Exam(models.Model):
     def __str__(self):
         return f"{self.exam_name} - {self.cohort.cohort_name}.{self.cohort.id}"  
 
-class Attended(models.Model):
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    score = models.IntegerField(default=0)
-    date_taken = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.exam.exam_name} - {self.user.username}({self.user.id})"  
-    class Meta:
-        unique_together = ('exam', 'user')
-
 class MCQ(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     question = models.CharField(max_length=200)
@@ -59,3 +48,21 @@ class AnswerMCQ(models.Model):
 
     def is_correct(self):
         return self.selected_option == self.mcq.answer
+    
+
+class Attended(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
+    date_taken = models.DateTimeField(auto_now_add=True)
+
+    #def calculate_score(self):
+        #answers = AnswerMCQ.objects.filter(user=self.user, mcq__exam=self.exam)
+        #score = sum(answer.mcq.marks for answer in answers if answer.is_correct())
+        #self.score = score
+        #self.save()
+
+    def __str__(self):
+        return f"{self.exam.exam_name} - {self.user.username}({self.user.id})"  
+    class Meta:
+        unique_together = ('exam', 'user')

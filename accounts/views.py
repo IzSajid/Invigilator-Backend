@@ -94,6 +94,7 @@ def joined_cohorts(request):
 
 
 @api_view(['GET','POST','DELETE'])
+@permission_classes([IsAuthenticated])
 def cohort(request,id):
     try:
         data = Cohort.objects.get(pk=id)
@@ -116,6 +117,7 @@ def cohort(request,id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+#@permission_classes([IsAuthenticated])
 def cohort_users(request, cohort_id):
     try:
         cohort = Cohort.objects.get(id=cohort_id)
@@ -131,7 +133,7 @@ def cohort_users(request, cohort_id):
     
 
 @api_view(['GET','POST','DELETE'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def exams(request, id):
     try:
         exam = Exam.objects.get(id=id)
@@ -174,6 +176,7 @@ def create_exam(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
 
 @api_view(['GET'])
+#@permission_classes([IsAuthenticated])
 def exams_by_cohort(request, cohort_id):
     exams = Exam.objects.filter(cohort__id=cohort_id)
     serializer = ExamSerializer(exams, many=True)
@@ -181,7 +184,7 @@ def exams_by_cohort(request, cohort_id):
 
 #QUESTION GET
 @api_view(['GET','POST','DELETE'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def exam_questions(request, exam_id):
     try:
         exam = Exam.objects.get(id=exam_id)
@@ -217,6 +220,7 @@ def exam_questions(request, exam_id):
 
 #ANSWER GET
 @api_view(['GET', 'POST'])
+#@permission_classes([IsAuthenticated])
 def answer_mcq(request):
     if request.method == 'GET':
         answers = AnswerMCQ.objects.all()
@@ -232,6 +236,7 @@ def answer_mcq(request):
 
 #USER ANSWSER IN ONE EXAM   
 @api_view(['GET'])
+#@permission_classes([IsAuthenticated])
 def user_exam_answers(request, user_id, exam_id):
     answers = AnswerMCQ.objects.filter(user_id=user_id, mcq__exam_id=exam_id)
     serializer = AnswerMCQSerializer(answers, many=True)
@@ -239,6 +244,7 @@ def user_exam_answers(request, user_id, exam_id):
 
 #ATTENDED EXAM
 @api_view(['GET','POST'])
+@permission_classes([IsAuthenticated])
 def attended_exam(request, exam_id):
     if request.method == 'GET':
         attended = Attended.objects.filter(exam_id=exam_id)
