@@ -117,7 +117,7 @@ def cohort(request,id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def cohort_users(request, cohort_id):
     try:
         cohort = Cohort.objects.get(id=cohort_id)
@@ -133,7 +133,7 @@ def cohort_users(request, cohort_id):
     
 
 @api_view(['GET','POST','DELETE'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def exams(request, id):
     try:
         exam = Exam.objects.get(id=id)
@@ -161,7 +161,7 @@ def exams(request, id):
             return Response({'detail': 'Deleted'}, status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def create_exam(request):
     # Check if the request.user is the creator of the cohort
     cohort_id = request.data.get('cohort')
@@ -184,7 +184,7 @@ def exams_by_cohort(request, cohort_id):
 
 #QUESTION GET
 @api_view(['GET','POST','DELETE'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def exam_questions(request, exam_id):
     try:
         exam = Exam.objects.get(id=exam_id)
@@ -220,7 +220,7 @@ def exam_questions(request, exam_id):
 
 #ANSWER GET
 @api_view(['GET', 'POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def answer_mcq(request):
     if request.method == 'GET':
         answers = AnswerMCQ.objects.all()
@@ -236,14 +236,14 @@ def answer_mcq(request):
 
 #USER ANSWSER IN ONE EXAM   
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def user_exam_answers(request, user_id, exam_id):
     answers = AnswerMCQ.objects.filter(user_id=user_id, mcq__exam_id=exam_id)
     serializer = AnswerMCQSerializer(answers, many=True)
     return Response(serializer.data)
 
 #ATTENDED EXAM
-@api_view(['GET','POST'])
+@api_view(['GET','POST','PATCH'])
 @permission_classes([IsAuthenticated])
 def attended_exam(request, exam_id):
     if request.method == 'GET':
@@ -257,3 +257,15 @@ def attended_exam(request, exam_id):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'PATCH':
+        try:
+            attended = Attended.objects.get(exam_id=exam_id, user=request.user)
+        except Attended.DoesNotExist:
+            return Response({'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        attended.calculate_score()
+        attended.save()
+
+        serializer = AttendedSerializer(attended)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -49,6 +49,8 @@ class AnswerMCQ(models.Model):
     def is_correct(self):
         return self.selected_option == self.mcq.answer
     
+    class Meta:
+        unique_together = ('mcq', 'user')
 
 class Attended(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
@@ -56,11 +58,11 @@ class Attended(models.Model):
     score = models.IntegerField(default=0)
     date_taken = models.DateTimeField(auto_now_add=True)
 
-    #def calculate_score(self):
-        #answers = AnswerMCQ.objects.filter(user=self.user, mcq__exam=self.exam)
-        #score = sum(answer.mcq.marks for answer in answers if answer.is_correct())
-        #self.score = score
-        #self.save()
+    def calculate_score(self):
+        answers = AnswerMCQ.objects.filter(user=self.user, mcq__exam=self.exam)
+        score = sum(answer.mcq.marks for answer in answers if answer.is_correct())
+        self.score = score
+        self.save()
 
     def __str__(self):
         return f"{self.exam.exam_name} - {self.user.username}({self.user.id})"  
