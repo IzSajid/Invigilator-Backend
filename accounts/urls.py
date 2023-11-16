@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/joined/', views.joined_cohorts, name='joined_cohorts'),
     #EXAMS
     path('api/exams/<int:id>/', views.exams, name='exams'),
+    path('api/exam/create/', views.create_exam, name='create_exam'),
     path('api/exam/cohort/<int:cohort_id>/', views.exams_by_cohort, name='exams_by_cohort'),
     path('api/exam/<int:exam_id>/questions/', views.exam_questions, name='exam_questions'),
     path('api/answer/mcq/', views.answer_mcq, name='answer_mcq'),

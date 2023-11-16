@@ -52,7 +52,7 @@ class JoinedCohortSerializer(serializers.ModelSerializer):
 class ExamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exam
-        fields = ['id','cohort', 'exam_name', 'exam_duration', 'exam_availabilty']
+        fields = ['id','cohort', 'exam_name']
 
 class AttendedSerializer(serializers.ModelSerializer):
     class Meta:

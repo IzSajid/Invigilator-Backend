@@ -176,7 +176,7 @@ def create_exam(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def exams_by_cohort(request, cohort_id):
     exams = Exam.objects.filter(cohort__id=cohort_id)
     serializer = ExamSerializer(exams, many=True)
@@ -199,7 +199,7 @@ def exam_questions(request, exam_id):
     elif request.method == 'POST':
         # Check if the request.user is the creator of the cohort
         if exam.cohort.cohort_creator != request.user:
-            return Response({'detail': 'Only the creator of the cohort can create an exam.'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'detail': 'Only the creator of the cohort can create a question.'}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = MCQSerializer(data=request.data)
         if serializer.is_valid():
