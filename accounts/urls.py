@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/exam/create/', views.create_exam, name='create_exam'),
     path('api/exam/cohort/<int:cohort_id>/', views.exams_by_cohort, name='exams_by_cohort'),
     path('api/exam/<int:exam_id>/questions/', views.exam_questions, name='exam_questions'),
+    path('api/questions/<int:question_id>/', views.delete_question, name='delete_question'),
     path('api/answer/mcq/', views.answer_mcq, name='answer_mcq'),
     path('api/exam/answers/<int:user_id>/<int:exam_id>/', views.user_exam_answers, name='user_exam_answers'),
     path('api/exams/<int:exam_id>/attended/', views.attended_exam, name='attended_exam'),

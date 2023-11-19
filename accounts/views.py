@@ -183,7 +183,7 @@ def exams_by_cohort(request, cohort_id):
     return Response(serializer.data)
 
 #QUESTION GET
-@api_view(['GET','POST','DELETE'])
+@api_view(['GET','POST'])
 @permission_classes([IsAuthenticated])
 def exam_questions(request, exam_id):
     try:
@@ -207,15 +207,17 @@ def exam_questions(request, exam_id):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        # Check if the request.user is the creator of the cohort
-        if exam.cohort.cohort_creator != request.user:
-            return Response({'detail': 'Only the creator of the cohort can create an exam.'}, status=status.HTTP_403_FORBIDDEN)
+#QUESTION DELETE
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_question(request, question_id):
+    # Check if the request.user is the creator of the cohort
+    question = MCQ.objects.get(id=question_id)
+    if question.exam.cohort.cohort_creator != request.user:
+        return Response({'detail': 'Only the creator of the cohort can delete a question.'}, status=status.HTTP_403_FORBIDDEN)
 
-        question_id = request.data.get('id')
-        question = MCQ.objects.get(id=question_id)
-        question.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    question.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 #ANSWER GET
